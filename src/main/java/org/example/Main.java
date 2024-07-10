@@ -1,16 +1,18 @@
 package org.example;
 
+import java.util.Scanner;
+
 public class main {
-    private char[][] board; // Das Spielfeld
-    private char currentPlayerSymbol; // Symbol des aktuellen Spielers ('X' oder 'O')
+    private char[][] board;
+    private char currentPlayerSymbol;
 
     public main() {
-        board = new char[3][3]; // 3x3 Spielfeld initialisieren
-        currentPlayerSymbol = 'X'; // Startspieler ist 'X'
+        board = new char[3][3];
+        currentPlayerSymbol = 'X';
         initializeBoard();
     }
 
-    // Methode zum Initialisieren des Spielfelds
+    // Initialisiert das Spielfeld mit leeren Feldern
     private void initializeBoard() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -19,49 +21,120 @@ public class main {
         }
     }
 
-    // Methode zum Setzen eines Zugs
+    // Zeigt das aktuelle Spielfeld an
+    public void displayBoard() {
+        System.out.println("Aktuelles Spielfeld:");
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(board[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    // Überprüft, ob der Zug gültig ist
+    private boolean isValidMove(int row, int col) {
+        if (row >= 0 && row < 3 && col >= 0 && col < 3) {
+            return board[row][col] == '-';
+        }
+        return false;
+    }
+
+    // Führt den Zug aus und überprüft das Spielende
     public void makeMove(int row, int col) {
         if (isValidMove(row, col)) {
             board[row][col] = currentPlayerSymbol;
-            switchPlayer();
+            if (checkWin()) {
+                System.out.println("Spieler " + currentPlayerSymbol + " gewinnt!");
+                displayBoard();
+                promptNewGame();
+            } else if (isBoardFull()) {
+                System.out.println("Das Spiel endet unentschieden!");
+                displayBoard();
+                promptNewGame();
+            } else {
+                switchPlayer();
+            }
         } else {
             System.out.println("Ungültiger Zug. Bitte wählen Sie ein leeres Feld.");
         }
     }
 
-    // Methode zur Überprüfung, ob ein Zug gültig ist
-    private boolean isValidMove(int row, int col) {
-        return row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] == '-';
-    }
-
-    // Methode zum Wechseln des Spielers
+    // Wechselt den Spieler
     private void switchPlayer() {
         currentPlayerSymbol = (currentPlayerSymbol == 'X') ? 'O' : 'X';
     }
 
-    // Methode zum Anzeigen des aktuellen Spielfelds
-    public void displayBoard() {
-        System.out.println("-------------");
+    // Überprüft, ob das Spielfeld voll ist
+    private boolean isBoardFull() {
         for (int i = 0; i < 3; i++) {
-            System.out.print("| ");
             for (int j = 0; j < 3; j++) {
-                System.out.print(board[i][j] + " | ");
+                if (board[i][j] == '-') {
+                    return false;
+                }
             }
-            System.out.println();
-            System.out.println("-------------");
         }
+        return true;
+    }
+
+    // Überprüft, ob ein Spieler gewonnen hat
+    private boolean checkWin() {
+        // Überprüfen der Zeilen
+        for (int i = 0; i < 3; i++) {
+            if (board[i][0] == currentPlayerSymbol && board[i][1] == currentPlayerSymbol && board[i][2] == currentPlayerSymbol) {
+                return true;
+            }
+        }
+
+        // Überprüfen der Spalten
+        for (int i = 0; i < 3; i++) {
+            if (board[0][i] == currentPlayerSymbol && board[1][i] == currentPlayerSymbol && board[2][i] == currentPlayerSymbol) {
+                return true;
+            }
+        }
+
+        // Überprüfen der Diagonalen
+        if (board[0][0] == currentPlayerSymbol && board[1][1] == currentPlayerSymbol && board[2][2] == currentPlayerSymbol) {
+            return true;
+        }
+
+        if (board[0][2] == currentPlayerSymbol && board[1][1] == currentPlayerSymbol && board[2][0] == currentPlayerSymbol) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Fragt den Spieler, ob ein neues Spiel gestartet werden soll
+    private void promptNewGame() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Möchten Sie ein neues Spiel starten? (ja/nein)");
+        String response = scanner.nextLine();
+        if (response.equalsIgnoreCase("ja")) {
+            startNewGame();
+        } else {
+            System.out.println("Danke fürs Spielen!");
+        }
+    }
+
+    // Startet ein neues Spiel
+    public void startNewGame() {
+        initializeBoard();
+        currentPlayerSymbol = 'X';
+        System.out.println("Neues Spiel gestartet!");
+        displayBoard();
     }
 
     public static void main(String[] args) {
         main game = new main();
-        game.displayBoard(); // Anfangszustand des Spielfelds anzeigen
-
-        // Beispielzüge für Spieler X und O
-        game.makeMove(0, 0); // Spieler X setzt auf Feld (0,0)
-        game.displayBoard(); // Aktualisiertes Spielfeld anzeigen
-
-        game.makeMove(1, 1); // Spieler O setzt auf Feld (1,1)
-        game.displayBoard(); // Aktualisiertes Spielfeld anzeigen
+        Scanner scanner = new Scanner(System.in);
+        game.displayBoard();
+        while (true) {
+            System.out.println("Spieler " + game.currentPlayerSymbol + ", geben Sie Ihre Bewegung ein (Reihe und Spalte): ");
+            int row = scanner.nextInt();
+            int col = scanner.nextInt();
+            game.makeMove(row, col);
+        }
     }
 }
-}
+
